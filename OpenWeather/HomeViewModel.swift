@@ -58,9 +58,6 @@ final class HomeViewModel: ObservableObject {
                 print("Search text length dropped below 4, internalSearchButtonPressed set to false")
             })
             .store(in: &cancellables)
-        
-        request()
-        
     }
     
     func performInternalRestaurantSearch() {
@@ -100,7 +97,7 @@ final class HomeViewModel: ObservableObject {
         // Only proceed normally if we have Always authorization
         if currentStatus == .authorizedAlways {
             print("Have 'Always' authorization, proceeding normally")
-            _ = getLocation().sink { location in
+            getLocation().sink { location in
                 print("Got location: \(location)")
                 self.updateWithLocation(location)
             }.store(in: &cancellables)
@@ -114,10 +111,10 @@ final class HomeViewModel: ObservableObject {
             Task {
                 await setErrorWithMessage(
                     "Limited Functionality",
-                    "Duke works best with 'Always Allow' location access. Some features will be unavailable. Please update permissions in Settings.",
+                    NSError(domain: "HomeVMLocation", code: 1001, userInfo: [NSLocalizedDescriptionKey: "OpenWeather works best with 'Always Allow' location access Please enable location access inside Settings App"]),
+                   
                     handler: {
-                        // Provide limited functionality
-                        _ = self.getLocation().sink { location in
+                        self.getLocation().sink { location in
                             self.updateWithLocation(location)
                         }.store(in: &self.cancellables)
                     }
@@ -138,7 +135,7 @@ final class HomeViewModel: ObservableObject {
                 switch authorizationStatus {
                 case .authorizedAlways:
                     print("Received 'Always' permission, proceeding normally")
-                    _ = self.getLocation().sink { location in
+                    self.getLocation().sink { location in
                         self.updateWithLocation(location)
                     }.store(in: &self.cancellables)
                     return false // Hide modal
@@ -147,8 +144,8 @@ final class HomeViewModel: ObservableObject {
                     print("Only received 'When In Use' permission - prompting for upgrade")
                     Task {
                         await setErrorWithMessage(
-                            "Additional Permissions Needed",
-                            "Duke requires 'Always Allow' location access. Please tap 'Change to Always Allow' when prompted or update in Settings.",
+                            "Additional Permissions Requested",
+                            NSError(domain: "HomeVMLocation", code: 1001, userInfo: [NSLocalizedDescriptionKey: "OpenWeather requires 'Always Allow' location access. Please tap 'Change to Always Allow' when prompted or update in Settings."]),
                             handler: {
                                 // Prompt again for Always authorization
                                 self.manager.requestAlwaysAuthorization()
@@ -162,7 +159,7 @@ final class HomeViewModel: ObservableObject {
                     Task {
                         await setErrorWithMessage(
                             "Location Access Required",
-                            "Duke cannot function without location access. Please enable 'Always Allow' location access in Settings.",
+                            NSError(domain: "HomeVMLocation", code: 1001, userInfo: [NSLocalizedDescriptionKey: "OpenWeather requires 'Always Allow' location access. Please tap 'Change to Always Allow' when prompted or update in Settings."]),
                             handler: {
                                 // Offer to open settings
                                 if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
@@ -193,8 +190,10 @@ final class HomeViewModel: ObservableObject {
         else if locationStatus == .denied || locationStatus == .restricted {
             Task {
                 try await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
-                await setErrorWithMessage("Location access not given", "Duke cannot function properly without location access. Please enable location access inside Settings App", handler: {
+                await setErrorWithMessage("Location access not given", NSError(domain: "HomeVMLocation", code: 1001, userInfo: [NSLocalizedDescriptionKey: "OpenWeather cannot function properly without location access. Please enable location access inside Settings App"]), handler: {
                 })
+                
+                
             }
             return false
         } else {
