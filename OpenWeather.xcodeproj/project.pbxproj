@@ -18,9 +18,22 @@
 		9F27459F2DB2B07900FEE523 /* OpenWeather.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenWeather.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		9F8441532DB2FCE700A9D751 /* Exceptions for "OpenWeather" folder in "OpenWeather" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 9F27459E2DB2B07900FEE523 /* OpenWeather */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9F2745A12DB2B07900FEE523 /* OpenWeather */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				9F8441532DB2FCE700A9D751 /* Exceptions for "OpenWeather" folder in "OpenWeather" target */,
+			);
 			path = OpenWeather;
 			sourceTree = "<group>";
 		};
@@ -278,8 +291,12 @@
 				DEVELOPMENT_TEAM = ZD3ZX8KHC6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OpenWeather/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = OpenWeather;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "OpenWeather requests location permissions to help find the properly find updated in your area";
+				INFOPLIST_KEY_NSLocationUsageDescription = "We need location permissions to help us find the weather info in your area";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Granting OpenWeather location permissions will allow us to display the best weather updates in your area";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -313,8 +330,12 @@
 				DEVELOPMENT_TEAM = ZD3ZX8KHC6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OpenWeather/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = OpenWeather;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "OpenWeather requests location permissions to help find the properly find updated in your area";
+				INFOPLIST_KEY_NSLocationUsageDescription = "We need location permissions to help us find the weather info in your area";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Granting OpenWeather location permissions will allow us to display the best weather updates in your area";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -13,8 +13,10 @@ import FirebaseFirestore
 import Firebase
 import SwiftUI
 import FirebaseAuth
+import Resolver
 
 final class HomeViewModel: ObservableObject {
+    @Injected var weatherManager: WeatherManager
     @Published var searchText : String
     @Published private(set) var debouncedSearch: String = ""
     @Published var region : MKCoordinateRegion
@@ -35,6 +37,8 @@ final class HomeViewModel: ObservableObject {
     @Published var errorTitle = ""
     @Published var errorMessage = ""
     @Published var onErrorDismiss: (() -> Void)? = nil
+    
+    @Published var weather: ResponseBody?
     
     init() {
         searchText = ""
@@ -58,12 +62,75 @@ final class HomeViewModel: ObservableObject {
                 print("Search text length dropped below 4, internalSearchButtonPressed set to false")
             })
             .store(in: &cancellables)
+        
+        request()
     }
     
     func performInternalRestaurantSearch() {
         if search.count >= 4 {
             debouncedSearch = search // should possibly rename search to restaurantsearch for disambiguation purposes
         }
+    }
+    
+    func request() {
+        let location = getLocation().share()
+        
+        // Store all subscriptions to prevent them from being cancelled
+        location
+            .flatMap {
+                $0.reverseGeocode()
+            }
+            .compactMap(\.first)
+            .compactMap(\.locality)
+            .replaceError(with: "Loading...")
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { _ in },
+                receiveValue: { [weak self] cityName in
+                    self?.cityName = cityName
+                    print("City name updated to: \(cityName)")  // Debug print
+                }
+            )
+            .store(in: &cancellables)
+        
+        // Get weather data using the obtained location
+            location
+                .sink { [weak self] location in
+                    guard let self = self else { return }
+                    
+                    Task {
+                        do {
+                            let weatherData = try await self.weatherManager.getCurrentWeather(
+                                latitude: location.coordinate.latitude,
+                                longitude: location.coordinate.longitude
+                            )
+                            
+                            // Update the weather property on the main thread
+                            DispatchQueue.main.async {
+                                self.weather = weatherData
+                                print("Weather data updated for \(weatherData.name)")
+                            }
+                        } catch {
+                            print("Error fetching weather: \(error.localizedDescription)")
+                            DispatchQueue.main.async {
+                                self.showErrorAlert = true
+                                self.errorTitle = "Weather Error"
+                                self.errorMessage = "Failed to load weather data: \(error.localizedDescription)"
+                            }
+                        }
+                    }
+                }
+                .store(in: &cancellables)
+        
+        // Monitor cityName changes
+        $cityName
+            .dropFirst()
+            .sink { cityName in
+                if !cityName.isEmpty {
+                    print("Request successfully called for \(cityName)")
+                }
+            }
+            .store(in: &cancellables)
     }
     
     // Add this helper method to centralize location update handling
@@ -85,6 +152,14 @@ final class HomeViewModel: ObservableObject {
                 print("City name updated to: \(cityName)")
             }
             .store(in: &cancellables)
+        
+        // Trigger API requests if needed
+//        if !self.businesses.isEmpty {
+//            print("Refreshing businesses with new location")
+//            self.request()
+//        }
+        
+        self.request()
     }
     
     //using methods from ExtensionKit to leverage Combine to provide AuthorizationStatus publisher and avoid implementing a delegate pattern
@@ -179,26 +254,6 @@ final class HomeViewModel: ObservableObject {
                 }
             }
             .assign(to: &$showModal)
-    }
-
-    func shouldShowLocationPromptSheet(_ locationStatus: CLAuthorizationStatus) -> Bool {
-        print("shouldShowLocationPromptSheet called with status: \(locationStatus)") // Add this
-
-        if locationStatus == .notDetermined {
-            return true
-        }
-        else if locationStatus == .denied || locationStatus == .restricted {
-            Task {
-                try await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
-                await setErrorWithMessage("Location access not given", NSError(domain: "HomeVMLocation", code: 1001, userInfo: [NSLocalizedDescriptionKey: "OpenWeather cannot function properly without location access. Please enable location access inside Settings App"]), handler: {
-                })
-                
-                
-            }
-            return false
-        } else {
-            return false
-        }
     }
     
     func getLocation () -> AnyPublisher<CLLocation, Never> {
