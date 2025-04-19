@@ -39,6 +39,10 @@ final class HomeViewModel: ObservableObject {
     @Published var onErrorDismiss: (() -> Void)? = nil
     
     @Published var weather: ResponseBody?
+    @Published var forecast: Forecast?
+    @Published var forecastIsLoading: Bool = false
+    @Published var forecastError: Error?
+    @Published var forecastState: ForecastState = .loading
     
     init() {
         searchText = ""
@@ -77,50 +81,51 @@ final class HomeViewModel: ObservableObject {
         
         // Store all subscriptions to prevent them from being cancelled
         location
-            .flatMap {
-                $0.reverseGeocode()
-            }
-            .compactMap(\.first)
-            .compactMap(\.locality)
-            .replaceError(with: "Loading...")
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { _ in },
-                receiveValue: { [weak self] cityName in
-                    self?.cityName = cityName
-                    print("City name updated to: \(cityName)")  // Debug print
-                }
-            )
-            .store(in: &cancellables)
-        
-        // Get weather data using the obtained location
-            location
-                .sink { [weak self] location in
-                    guard let self = self else { return }
-                    
-                    Task {
-                        do {
-                            let weatherData = try await self.weatherManager.getCurrentWeather(
-                                latitude: location.coordinate.latitude,
-                                longitude: location.coordinate.longitude
-                            )
-                            
-                            // Update the weather property on the main thread
-                            DispatchQueue.main.async {
-                                self.weather = weatherData
-                                print("Weather data updated for \(weatherData.name)")
-                            }
-                        } catch {
-                            print("Error fetching weather: \(error.localizedDescription)")
-                            DispatchQueue.main.async {
-                                self.showErrorAlert = true
-                                self.errorTitle = "Weather Error"
-                                self.errorMessage = "Failed to load weather data: \(error.localizedDescription)"
-                            }
-                        }
-                    }
-                }
-                .store(in: &cancellables)
+                  .sink { [weak self] location in
+                      guard let self = self else { return }
+                      
+                      Task {
+                          do {
+                              // current weather
+                              let weatherData = try await self.weatherManager.getCurrentWeather(
+                                  latitude: location.coordinate.latitude,
+                                  longitude: location.coordinate.longitude
+                              )
+                              
+                              DispatchQueue.main.async {
+                                  self.weather = weatherData
+                                  print("Weather data updated for \(weatherData.name)")
+                              }
+                              
+                              // forecast data
+                              DispatchQueue.main.async {
+                                  self.forecastState = .loading
+                              }
+                              let forecastData = try await self.weatherManager.getForecast(
+                                  latitude: location.coordinate.latitude,
+                                  longitude: location.coordinate.longitude
+                              )
+                              
+                              DispatchQueue.main.async {
+                                  self.forecast = forecastData
+                                  self.forecastState = .success(content: forecastData)
+                                  print("Forecast data updated for \(forecastData.city.name)")
+                              }
+                          } catch {
+                              print("Error fetching data: \(error.localizedDescription)")
+                              DispatchQueue.main.async {
+                                  if self.weather == nil {
+                                      self.showErrorAlert = true
+                                      self.errorTitle = "Weather Error"
+                                      self.errorMessage = "Failed to load weather data: \(error.localizedDescription)"
+                                  }
+                                  self.forecastState = .failed(error: error)
+                                  self.forecastError = error
+                              }
+                          }
+                      }
+                  }
+                  .store(in: &cancellables)
         
         // Monitor cityName changes
         $cityName

@@ -24,6 +24,27 @@ class WeatherManager {
         
         return decodedData
     }
+    
+    func getForecast(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> Forecast {
+            guard let url = URL(string: "https://api.openweathermap.org/data/2.5/forecast?lat=\(latitude)&lon=\(longitude)&units=metric&appid=1a2176f7883d06ded7ca7e8dc6e19f18") else {
+                fatalError("Missing forecast URL")
+            }
+            
+            let urlRequest = URLRequest(url: url)
+            
+            let (data, response) = try await URLSession.shared.data(for: urlRequest)
+            
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else {
+                throw APIError.errorCode((response as? HTTPURLResponse)?.statusCode ?? 500)
+            }
+            
+            do {
+                let decodedData = try JSONDecoder().decode(Forecast.self, from: data)
+                return decodedData
+            } catch {
+                throw APIError.decodingError
+            }
+        }
 }
 
 struct ResponseBody: Decodable {

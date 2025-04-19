@@ -2,7 +2,7 @@
 //  WeatherView.swift
 //  OpenWeather
 //
-//  Created by user276583 on 4/18/25.
+//  Created by Simbarashe Dombodzvuku on 4/18/25.
 //
 
 
