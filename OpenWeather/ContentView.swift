@@ -29,37 +29,6 @@ struct ContentView: View {
                             }
                         }
                 }
-                
-                // Forecast view
-                               switch homeViewModel.forecastState {
-                               case .loading:
-                                   ProgressView()
-                                       .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                       .frame(maxWidth: .infinity, minHeight: 150)
-                                       .padding()
-                               
-                               case .success(let forecast):
-                                   ForecastView(forecast: forecast)
-                               
-                               case .failed(let error):
-                                   VStack {
-                                       Text("Failed to load forecast")
-                                           .foregroundColor(.red)
-                                       Text(error.localizedDescription)
-                                           .font(.caption)
-                                           .foregroundColor(.red.opacity(0.8))
-                                       Button("Retry") {
-                                           homeViewModel.request()
-                                       }
-                                       .padding()
-                                       .background(Color.blue)
-                                       .foregroundColor(.white)
-                                       .cornerRadius(8)
-                                   }
-                                   .padding()
-                                   .background(Color.red.opacity(0.1))
-                                   .cornerRadius(10)
-                               }
             }
             .padding()
         }
