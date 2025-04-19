@@ -42,6 +42,14 @@ struct RoundedCorner: Shape {
 }
 
 extension View {
+    func glow(color: Color = .red, radius: CGFloat = 20) -> some View {
+        self
+            .overlay(self.blur(radius: radius / 6))
+            .shadow(color: color, radius: radius / 3)
+            .shadow(color: color, radius: radius / 3)
+            .shadow(color: color, radius: radius / 3)
+    }
+    
     public func gradientForeground(colors: [Color]) -> some View {
         self.overlay(LinearGradient(gradient: .init(colors: colors), startPoint: .topLeading, endPoint: .bottomTrailing))
         .mask(self)
@@ -127,4 +135,26 @@ extension Image {
     }
 }
 
-
+struct CustomRow<Left, Center, Right>: View where Left: View, Center: View, Right: View {
+    let left: () -> Left
+    let center: () -> Center
+    let right: () -> Right
+    init(@ViewBuilder left: @escaping () -> Left, @ViewBuilder center: @escaping () -> Center, @ViewBuilder right: @escaping () -> Right) {
+        self.left = left
+        self.center = center
+        self.right = right
+    }
+    var body: some View {
+        ZStack {
+            HStack {
+                left()
+                Spacer()
+            }
+            center()
+            HStack {
+                Spacer()
+                right()
+            }
+        }
+    }
+}

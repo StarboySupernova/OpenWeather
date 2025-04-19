@@ -24,6 +24,9 @@ final class HomeViewModel: ObservableObject {
     @Published var cityName : String = ""
     @Published var completions = [String]()
     
+    @Published var lastSeenLocation: CLLocation?
+    @Published var defaultLocation = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194) // Default to San Francisco
+    
     let manager = CLLocationManager()
     
     @Published var search = ""
@@ -65,6 +68,13 @@ final class HomeViewModel: ObservableObject {
                 self?.internalSearchButtonPressed = false
                 print("Search text length dropped below 4, internalSearchButtonPressed set to false")
             })
+            .store(in: &cancellables)
+        
+        getLocation()
+            .sink { [weak self] location in
+                guard let self = self else { return }
+                self.lastSeenLocation = location
+            }
             .store(in: &cancellables)
         
         request()
