@@ -54,7 +54,7 @@ struct PermissionView: View {
                                                alignment: .topLeading)
                                         .padding(.trailing)
                                     
-                                    Text("DUKE")
+                                    Text("OpenWeather")
                                         .font(.largeTitle)
                                         .fontWeight(.ultraLight)
                                         .padding(.bottom, .large)
@@ -63,7 +63,7 @@ struct PermissionView: View {
                                                 radius: 40, x: 0, y: 20)
                                         .padding(.top, getRelativeHeight(10.0))
                                         .padding(.trailing, getRelativeWidth(10.0))
-                                    Text("Savour the flavour, discover with Duke, the food sanctuary")
+                                    Text("Weather at your fingertips")
                                         .fontWeight(.regular)
                                         .foregroundColor(Color.white)
                                         .multilineTextAlignment(.leading)
@@ -80,7 +80,7 @@ struct PermissionView: View {
                                                                    bottomLeft: 16.0,
                                                                    bottomRight: 16.0)
                                             .fill(Color.black))
-                                        Text("Join Our Food Lover's Club")
+                                        Text("Worldwide Coverage")
                                             .font(FontScheme
                                                 .kRobotoCondensedRegular(size: getRelativeHeight(13.0)))
                                             .fontWeight(.regular)
@@ -106,7 +106,7 @@ struct PermissionView: View {
                                                                    bottomRight: 16.0)
                                             .fill(Color.black))
                                                                         
-                                        Text("Explore your senses")
+                                        Text("All Locations")
                                             .fontWeight(.regular)
                                             .foregroundColor(Color.white)
                                             .multilineTextAlignment(.leading)
@@ -140,7 +140,6 @@ struct PermissionView: View {
                                     )
                                     .padding(.vertical, getRelativeHeight(6.0))
                             }
-                           
                             
                             Button(action: {}, label: {
                                 Image("pencil")

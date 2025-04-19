@@ -11,7 +11,7 @@ struct HeroParallaxView: View {
     @State var translation: CGSize = .zero
     @State var isDragging = false
     @Binding var isAnimating: Bool
-    var showDukeBackground: Bool = false
+    var showBackground: Bool = false
     var centreImage: String = ""
     
     var animation : Animation {
@@ -34,8 +34,15 @@ struct HeroParallaxView: View {
                     .ignoresSafeArea()
                     
                     ZStack {
-                        ForEach(1..<14, id: \.self) { index in
-                            Image("food\(index % 7)")
+                        ForEach(1..<6, id: \.self) { index in
+                            Image("\(index)")
+                                .resizedToFill(width: 50, height: 50)
+                                .padding(.medium)
+                                .background(
+                                    Rectangle()
+                                        .fill(.ultraThinMaterial)
+                                        .cornerRadius(10)
+                                )
                             //self positioning through geometry bounds
                                 .position(x: .random(in: 0...geometry.size.width),
                                           y: .random(in: 0...geometry.size.height / 2)
@@ -43,7 +50,7 @@ struct HeroParallaxView: View {
                                 .animation(animation, value: isAnimating)
                         }
                     }
-                    .frame(height: geometry.size.height)
+                    .frame(height: getRect().height)
 
                     
                     Image("background1")
@@ -52,7 +59,7 @@ struct HeroParallaxView: View {
                         .frame(height: 600)
                         .overlay(
                             ZStack {
-                                if showDukeBackground {
+                                if showBackground {
                                     ZStack(alignment: .topLeading) {
                                         ZStack {}
                                             .frame(width: getRelativeWidth(240.0),
@@ -241,7 +248,7 @@ struct HeroParallaxView: View {
 
 struct HeroParallaxView_Previews: PreviewProvider {
     static var previews: some View {
-        HeroParallaxView(isAnimating: .constant(false))
+        HeroParallaxView(isAnimating: .constant(true)) 
     }
 }
 
