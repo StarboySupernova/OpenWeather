@@ -81,51 +81,51 @@ final class HomeViewModel: ObservableObject {
         
         // Store all subscriptions to prevent them from being cancelled
         location
-                  .sink { [weak self] location in
-                      guard let self = self else { return }
-                      
-                      Task {
-                          do {
-                              // current weather
-                              let weatherData = try await self.weatherManager.getCurrentWeather(
-                                  latitude: location.coordinate.latitude,
-                                  longitude: location.coordinate.longitude
-                              )
-                              
-                              DispatchQueue.main.async {
-                                  self.weather = weatherData
-                                  print("Weather data updated for \(weatherData.name)")
-                              }
-                              
-                              // forecast data
-                              DispatchQueue.main.async {
-                                  self.forecastState = .loading
-                              }
-                              let forecastData = try await self.weatherManager.getForecast(
-                                  latitude: location.coordinate.latitude,
-                                  longitude: location.coordinate.longitude
-                              )
-                              
-                              DispatchQueue.main.async {
-                                  self.forecast = forecastData
-                                  self.forecastState = .success(content: forecastData)
-                                  print("Forecast data updated for \(forecastData.city.name)")
-                              }
-                          } catch {
-                              print("Error fetching data: \(error.localizedDescription)")
-                              DispatchQueue.main.async {
-                                  if self.weather == nil {
-                                      self.showErrorAlert = true
-                                      self.errorTitle = "Weather Error"
-                                      self.errorMessage = "Failed to load weather data: \(error.localizedDescription)"
-                                  }
-                                  self.forecastState = .failed(error: error)
-                                  self.forecastError = error
-                              }
-                          }
-                      }
-                  }
-                  .store(in: &cancellables)
+            .sink { [weak self] location in
+                guard let self = self else { return }
+                
+                Task {
+                    do {
+                        // current weather
+                        let weatherData = try await self.weatherManager.getCurrentWeather(
+                            latitude: location.coordinate.latitude,
+                            longitude: location.coordinate.longitude
+                        )
+                        
+                        DispatchQueue.main.async {
+                            self.weather = weatherData
+                            print("Weather data updated for \(weatherData.name)")
+                        }
+                        
+                        // forecast data
+                        DispatchQueue.main.async {
+                            self.forecastState = .loading
+                        }
+                        let forecastData = try await self.weatherManager.getForecast(
+                            latitude: location.coordinate.latitude,
+                            longitude: location.coordinate.longitude
+                        )
+                        
+                        DispatchQueue.main.async {
+                            self.forecast = forecastData
+                            self.forecastState = .success(content: forecastData)
+                            print("Forecast data updated for \(forecastData.city.name)")
+                        }
+                    } catch {
+                        print("Error fetching data: \(error.localizedDescription)")
+                        DispatchQueue.main.async {
+                            if self.weather == nil {
+                                self.showErrorAlert = true
+                                self.errorTitle = "Weather Error"
+                                self.errorMessage = "Failed to load weather data: \(error.localizedDescription)"
+                            }
+                            self.forecastState = .failed(error: error)
+                            self.forecastError = error
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
         
         // Monitor cityName changes
         $cityName
@@ -158,12 +158,6 @@ final class HomeViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         
-        // Trigger API requests if needed
-//        if !self.businesses.isEmpty {
-//            print("Refreshing businesses with new location")
-//            self.request()
-//        }
-        
         self.request()
     }
     
@@ -192,7 +186,7 @@ final class HomeViewModel: ObservableObject {
                 await setErrorWithMessage(
                     "Limited Functionality",
                     NSError(domain: "HomeVMLocation", code: 1001, userInfo: [NSLocalizedDescriptionKey: "OpenWeather works best with 'Always Allow' location access Please enable location access inside Settings App"]),
-                   
+                    
                     handler: {
                         self.getLocation().sink { location in
                             self.updateWithLocation(location)
